@@ -1,0 +1,22 @@
+{
+  "name": "gamifybear",
+  "version": "0.0.1",
+  "description": "A discord bot that allows you do gamify your discord community life!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kulbear/GamifyBear.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Kulbear/GamifyBear/issues"
+  },
+  "homepage": "https://github.com/Kulbear/GamifyBear#readme",
+  "dependencies": {
+    "discord.js": "^14.14.1"
+  }
+}
