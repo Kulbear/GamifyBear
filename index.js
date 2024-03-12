@@ -2,10 +2,19 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
-const { token } = require('./config.json');
+const { token, clientId } = require('./discordConfig.json');
+const { firebaseConfig } = require('./firebaseConfig.json');
+
+const { initializeApp } = require('firebase/app');
+const { getFirestore, collection, addDoc } = require('firebase/firestore/lite');
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+console.log(`[INFO] Firebase app initialized with name [${app.name}`);
+const db = getFirestore(app);
 
 // Create a new client instance
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages] });
 
 // Create a new Collection to hold your commands.
 client.commands = new Collection();
@@ -34,6 +43,30 @@ for (const folder of commandFolders) {
 // It makes some properties non-nullable.
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+});
+
+
+client.on(Events.MessageCreate, async message => {
+	if (message.author.bot) return;
+
+	if (message.content === 'ping') {
+		message.reply('pong');
+	}
+
+	console.log(message.content);
+	// check if the message start with @ the bot
+	if (!message.content.startsWith(`<@${clientId}>`)) {return;}
+	else {
+		const messageCol = collection(db, 'messages');
+		const messageData = {
+			content: message.content,
+			timestamp: message.createdTimestamp,
+			author: message.author.tag,
+		};
+		// Log the message content to firebase store for later analysis
+		await addDoc(messageCol, messageData);
+		console.log(`Logged message from ${message.author.tag} to Firebase`);
+	}
 });
 
 

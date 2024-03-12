@@ -17,7 +17,8 @@
   },
   "homepage": "https://github.com/Kulbear/GamifyBear#readme",
   "dependencies": {
-    "discord.js": "^14.14.1"
+    "discord.js": "^14.14.1",
+    "firebase": "^10.8.1"
   },
   "devDependencies": {
     "eslint": "^8.57.0"
