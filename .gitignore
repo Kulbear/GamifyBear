@@ -130,4 +130,5 @@ dist
 .pnp.*
 
 # contains bot credentials
-config.json
+discordConfig.json
+supabaseConfig.json

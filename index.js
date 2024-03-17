@@ -2,10 +2,15 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
-const { token } = require('./config.json');
+const { token, clientId } = require('./discordConfig.json');
+const { supabaseUrl, supabaseKey } = require('./supabaseConfig.json');
+const { createClient } = require('@supabase/supabase-js');
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+console.log('[INFO] Supabase app initialized...');
 
 // Create a new client instance
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages] });
 
 // Create a new Collection to hold your commands.
 client.commands = new Collection();
@@ -34,6 +39,32 @@ for (const folder of commandFolders) {
 // It makes some properties non-nullable.
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+});
+
+
+client.on(Events.MessageCreate, async message => {
+	if (message.author.bot) return;
+
+	if (message.content === 'ping') {
+		message.reply('pong');
+	}
+
+	console.log(message.content);
+	// check if the message start with @ the bot
+	if (!message.content.startsWith(`<@${clientId}>`)) { return; }
+	else {
+
+		const messageData = {
+			content: message.content,
+			// timestamp: message.createdTimestamp,
+			author: message.author.tag,
+		};
+
+		// Supabase version
+		await supabase.from('messages').insert(messageData).then(
+			console.log('Insert Done.')).catch((error) => console.log(error));
+		console.log(`Logged message from ${message.author.tag} to Supabase`);
+	}
 });
 
 
