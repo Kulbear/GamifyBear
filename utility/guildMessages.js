@@ -1,8 +1,8 @@
 function sendMessageToChannel(client, channelId, messageContent) {
-	client.channels.fetch(channelId)
+	return client.channels.fetch(channelId)
 		.then(channel => {
-			channel.send(messageContent);
-		}).catch(console.error(`Channel with id ${channelId} not found`));
+			return channel.send(messageContent);
+		});
 }
 
 

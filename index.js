@@ -93,9 +93,34 @@ client.on(Events.MessageCreate, async message => {
 					sendMessageToChannel(client, DEBUG_CHANNEL_ID, `User ${userTag} is not found in the store.`);
 				}
 				else {
-					sendMessageToChannel(client, DEBUG_CHANNEL_ID, `User Profile: ${res.beautifyPrint()}`);
+					sendMessageToChannel(client, DEBUG_CHANNEL_ID, `User Profile: ${res.beautifyPrint()}`).then((msg) => {
+						// delete the message after 10 sec
+						setTimeout(() => {
+							msg.delete();
+						}, 10000);
+					});
 				}
 			});
+
+			// remove the command message and the infoMessage from the channel after a 5 sec time out
+			// also change the content of the message by adding a prefix "Delete in ${sec}" to the message, updated every second
+			// then delete the message after 5 sec
+			// TODO: maybe we can use a function to do this, or maybe we dont need this at all
+			let sec = 5;
+			const infoMessage = sendMessageToChannel(client, DEBUG_CHANNEL_ID, `[INFO] Command message will be deleted in ${sec} sec!`);
+			const interval = setInterval(() => {
+				if (sec >= 0) {
+					sec--;
+					infoMessage.then((msg) => {
+						msg.edit(`[INFO] Command message will be deleted in ${sec} sec!`);
+					});
+				}
+				else {
+					clearInterval(interval);
+					message.delete();
+					infoMessage.then(msg => msg.delete());
+				}
+			}, 1000);
 		}
 		else {
 			sendMessageToChannel(client, DEBUG_CHANNEL_ID, `Command ${messageContent} is not found.`);
