@@ -4,9 +4,10 @@
 const { Role } = require('./static.js');
 
 class Player {
-	constructor(dcId, dcTag, role = Role.MEMBER) {
+	constructor(dcId, dcTag, guildId, role = Role.MEMBER) {
 		this.dcTag = dcTag;
 		this.dcId = dcId;
+		this.guildId = guildId;
 		this.role = role;
 
 		this.level = 0;
@@ -44,6 +45,7 @@ class Player {
 		return {
 			'dcId': this.dcId,
 			'dcTag': this.dcTag,
+			'guildId': this.guildId,
 			'role': this.role,
 			'level': this.level,
 			'exp': this.exp,

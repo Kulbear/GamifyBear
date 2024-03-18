@@ -10,10 +10,18 @@ const {
 	onGuildAvailableInfoLog,
 	onGuildAvailableScanUsers,
 	onGuildAvailableBatchInitUsers,
+	onUserAddToGuild,
+	onUserRemoveFromGuild,
 } = require('./utility/playerProfile.js');
+
+const {
+	sendMessageToChannel,
+} = require('./utility/guildMessages.js');
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 console.log('[INFO] Supabase app initialized...');
+
+const DEBUG_CHANNEL_ID = '1215866984550629386';
 
 // Create a new client instance
 const client = new Client({
@@ -47,11 +55,15 @@ for (const folder of commandFolders) {
 	}
 }
 
+
 // When the client is ready, run this code (only once).
 // The distinction between `client: Client<boolean>` and `readyClient: Client<true>` is important for TypeScript developers.
 // It makes some properties non-nullable.
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+	// Send message to the channel with ID 1215866984550629386
+	// TODO: this is harded coded, need to find a way to get the channel id from the server
+	sendMessageToChannel(client, DEBUG_CHANNEL_ID, 'God Kulbear is ready to serve!');
 });
 
 
@@ -87,6 +99,20 @@ client.on(Events.GuildAvailable, async guild => {
 	onGuildAvailableBatchInitUsers(guild, supabase);
 });
 
+
+// when user join server
+client.on(Events.GuildMemberAdd, async member => {
+	console.log(`User ${member.user.tag} has joined the server!`);
+	onUserAddToGuild(member, member.guild, supabase);
+	sendMessageToChannel(client, DEBUG_CHANNEL_ID, `User ${member.user.displayName} (${member.user.nickname}) has joined the server!`);
+});
+
+// wher user leave server
+client.on(Events.GuildMemberRemove, async member => {
+	console.log(`User ${member.user.tag} has left the server`);
+	onUserRemoveFromGuild(member, member.guild, supabase);
+	sendMessageToChannel(client, DEBUG_CHANNEL_ID, `User ${member.user.displayName} (${member.user.nickname}) has left the server!`);
+});
 
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
