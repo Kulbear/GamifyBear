@@ -5,3 +5,7 @@ const Role = {
 	PREMIUM_MEMBER: 2,
 	MEMBER: 3,
 };
+
+module.exports = {
+	Role,
+};

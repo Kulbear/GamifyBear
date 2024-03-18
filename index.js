@@ -6,11 +6,24 @@ const { token, clientId } = require('./discordConfig.json');
 const { supabaseUrl, supabaseKey } = require('./supabaseConfig.json');
 const { createClient } = require('@supabase/supabase-js');
 
+const {
+	onGuildAvailableInfoLog,
+	onGuildAvailableScanUsers,
+	onGuildAvailableBatchInitUsers,
+} = require('./utility/playerProfile.js');
+
 const supabase = createClient(supabaseUrl, supabaseKey);
 console.log('[INFO] Supabase app initialized...');
 
 // Create a new client instance
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages] });
+const client = new Client({
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent,
+	],
+});
 
 // Create a new Collection to hold your commands.
 client.commands = new Collection();
@@ -65,6 +78,13 @@ client.on(Events.MessageCreate, async message => {
 			console.log('Insert Done.')).catch((error) => console.log(error));
 		console.log(`Logged message from ${message.author.tag} to Supabase`);
 	}
+});
+
+
+client.on(Events.GuildAvailable, async guild => {
+	onGuildAvailableInfoLog(guild);
+	onGuildAvailableScanUsers(guild);
+	onGuildAvailableBatchInitUsers(guild, supabase);
 });
 
 

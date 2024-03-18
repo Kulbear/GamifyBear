@@ -32,22 +32,12 @@ class Player {
 
 	updateAttributeFromStore(attributes) {
 		// get player data from object "attributes"
-
-		// assert attributes is not null
-		if (attributes === null) {
-			console.log('[INFO] Attributes is null.');
-			console.log(`[INFO] Creating a new player profile for ${this.dcTag}`);
-			return;
-		}
-
-		this.role = attributes.role;
-		this.level = attributes.level;
-		this.exp = attributes.exp;
-		this.have_task = attributes.have_task;
+		this.role = attributes['role'];
+		this.level = attributes['level'];
+		this.exp = attributes['exp'];
+		this.currentTaskId = attributes['currentTaskId'];
 		// map key value pairs in currencies to this.currencies
-		this.currencies = attributes.currencies.map((key, value) => {
-			this.currencies[key] = value;
-		});
+		this.currencies = attributes['currencies'];
 	}
 
 	returnAttributeToStore() {
@@ -57,7 +47,7 @@ class Player {
 			'role': this.role,
 			'level': this.level,
 			'exp': this.exp,
-			'currentTaskId': this.have_task,
+			'currentTaskId': this.currentTaskId,
 			'currencies': this.currencies,
 		};
 	}
@@ -90,3 +80,6 @@ class Player {
 	}
 }
 
+module.exports = {
+	Player,
+};
