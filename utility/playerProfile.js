@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const { Player } = require('../models/player.js');
 
 // Define a function that when the bot is added to a server, it will log the server name, id, member count, and owner id
@@ -84,6 +83,23 @@ async function onGuildAvailableBatchInitUsers(guild, supabaseStore) {
 	});
 }
 
+async function getUserProfile(userTag, guildId, supabaseStore) {
+	return supabaseStore.from('player').select().eq('guildId', guildId).eq('dcTag', userTag)
+		.then((res) => {
+			console.debug(`[INFO] Fetched data ${JSON.stringify(res)}.`);
+			if (res.data.length === 0) {
+				console.debug(`[INFO] User ${userTag} is not found in the store.`);
+				return null;
+			}
+			else {
+				console.debug(`[INFO] User ${userTag} is found in the store.`);
+				const player = new Player(res.data[0].dcId, res.data[0].dcTag, guildId);
+				player.updateAttributeFromStore(res.data[0]);
+				console.debug(JSON.stringify(player));
+				return player;
+			}
+		});
+}
 
 module.exports = {
 	onGuildAvailableInfoLog,
@@ -91,4 +107,5 @@ module.exports = {
 	onGuildAvailableBatchInitUsers,
 	onUserAddToGuild,
 	onUserRemoveFromGuild,
+	getUserProfile,
 };

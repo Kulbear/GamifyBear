@@ -1,7 +1,10 @@
 // Description: This file contains the player model.
 /* eslint-disable no-unused-vars */
 
-const { Role } = require('./static.js');
+const {
+	Role,
+	RoleIDToText,
+} = require('./static.js');
 
 class Player {
 	constructor(dcId, dcTag, guildId, role = Role.MEMBER) {
@@ -42,6 +45,7 @@ class Player {
 	}
 
 	returnAttributeToStore() {
+		this.updateLevel();
 		return {
 			'dcId': this.dcId,
 			'dcTag': this.dcTag,
@@ -52,6 +56,13 @@ class Player {
 			'currentTaskId': this.currentTaskId,
 			'currencies': this.currencies,
 		};
+	}
+
+	// Recursively print the player profile
+	// For properties that are text/numbers, print them with the format `\n|-> Property: value`
+	// For properties that are objects, print the key value pairs
+	beautifyPrint() {
+		return `\nPlayer: <@${this.dcId}> \n|-> Nametag: ${this.dcTag} \n|-> Level: ${this.level} \n|-> Exp: ${this.exp} \n|-> Role: ${RoleIDToText[this.role]} \n|-> Currencies: ${JSON.stringify(this.currencies)}`;
 	}
 
 	updateCurrency(currency, amount) {

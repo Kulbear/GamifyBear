@@ -12,6 +12,7 @@ const {
 	onGuildAvailableBatchInitUsers,
 	onUserAddToGuild,
 	onUserRemoveFromGuild,
+	getUserProfile,
 } = require('./utility/playerProfile.js');
 
 const {
@@ -78,6 +79,27 @@ client.on(Events.MessageCreate, async message => {
 	// check if the message start with @ the bot
 	if (!message.content.startsWith(`<@${clientId}>`)) { return; }
 	else {
+		// remove the bot mention from the message
+		const messageContent = message.content.replace(`<@${clientId}>`, '').trim();
+
+		// check if the message is a command
+		// Command: profile
+		if (messageContent.startsWith('profile')) {
+			const userTag = message.author.tag;
+			const guildId = message.guild.id;
+			// check user profile from supabase by userId and guildId
+			getUserProfile(userTag, guildId, supabase).then((res) => {
+				if (res === null) {
+					sendMessageToChannel(client, DEBUG_CHANNEL_ID, `User ${userTag} is not found in the store.`);
+				}
+				else {
+					sendMessageToChannel(client, DEBUG_CHANNEL_ID, `User Profile: ${res.beautifyPrint()}`);
+				}
+			});
+		}
+		else {
+			sendMessageToChannel(client, DEBUG_CHANNEL_ID, `Command ${messageContent} is not found.`);
+		}
 
 		const messageData = {
 			content: message.content,
@@ -104,14 +126,14 @@ client.on(Events.GuildAvailable, async guild => {
 client.on(Events.GuildMemberAdd, async member => {
 	console.log(`User ${member.user.tag} has joined the server!`);
 	onUserAddToGuild(member, member.guild, supabase);
-	sendMessageToChannel(client, DEBUG_CHANNEL_ID, `User ${member.user.displayName} (${member.user.nickname}) has joined the server!`);
+	sendMessageToChannel(client, DEBUG_CHANNEL_ID, `User <@${member.user.id}> (${member.user.displayName}) has joined the server!`);
 });
 
 // wher user leave server
 client.on(Events.GuildMemberRemove, async member => {
 	console.log(`User ${member.user.tag} has left the server`);
 	onUserRemoveFromGuild(member, member.guild, supabase);
-	sendMessageToChannel(client, DEBUG_CHANNEL_ID, `User ${member.user.displayName} (${member.user.nickname}) has left the server!`);
+	sendMessageToChannel(client, DEBUG_CHANNEL_ID, `User <@${member.user.id}> (${member.user.displayName}) has left the server!`);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
