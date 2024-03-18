@@ -61,7 +61,7 @@ client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 	// Send message to the channel with ID 1215866984550629386
 	// TODO: this is harded coded, need to find a way to get the channel id from the server
-	sendMessageToChannel(client, debugChannelId, 'God Kulbear is ready to serve!');
+	sendMessageToChannel(client, debugChannelId, '**God Chen the Almighty Creator** is ready to serve!');
 });
 
 

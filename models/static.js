@@ -12,7 +12,17 @@ const RoleIDToText = {
 	3: 'Member',
 };
 
+const QuestExpRewardCoefficient = {
+	REWARD_INTRO: 0.5,
+	REWARD_NORMAL: 1,
+	REWARD_HIGH: 1.5,
+	REWARD_VERY_HIGH: 2,
+	REWARD_EXTREME: 2.5,
+	REWARD_LEGENDARY: 3,
+};
+
 module.exports = {
 	Role,
 	RoleIDToText,
+	QuestExpRewardCoefficient,
 };
