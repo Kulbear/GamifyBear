@@ -1,10 +1,27 @@
 // Require the necessary discord.js classes
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+const {
+	Client,
+	Collection,
+	Events,
+	GatewayIntentBits,
+} = require('discord.js');
+
 const { token, clientId, debugChannelId } = require('./discordConfig.json');
 const { supabaseUrl, supabaseKey } = require('./supabaseConfig.json');
 const { createClient } = require('@supabase/supabase-js');
+
+const {
+	Quest,
+	QuestInstance,
+} = require('./models/quest.js');
+
+const {
+	onQuestDifficultySelect,
+	onQuestRepeatableSelect,
+	onPublishQuestModalSubmit,
+} = require('./utility/questHelper.js');
 
 const {
 	onGuildAvailableInfoLog,
@@ -30,6 +47,9 @@ const client = new Client({
 		GatewayIntentBits.MessageContent,
 	],
 });
+
+const quest = new Quest();
+const questInstance = new QuestInstance(1, 1);
 
 // Create a new Collection to hold your commands.
 client.commands = new Collection();
@@ -123,8 +143,33 @@ client.on(Events.GuildMemberRemove, async member => {
 	sendMessageToChannel(client, debugChannelId, `User <@${member.user.id}> (${member.user.displayName}) has left the server!`);
 });
 
+
 client.on(Events.InteractionCreate, async interaction => {
-	if (!interaction.isChatInputCommand()) return;
+	// Here we handle chat input commands and modal submit events
+	// TODO: Consider a better way for chaining the interaction events
+	// Quest Publish Chain:
+	// isModelSubmit: publishQuestModal -> onPublishQuestModalSubmit
+	// isStringSelectMenu: questRepeatable -> onQuestRepeatableSelect
+	// isStringSelectMenu: questDifficulty -> onQuestDifficultySelect
+
+	if (interaction.isStringSelectMenu()) {
+		if (interaction.customId === 'questRepeatable') {
+			onQuestRepeatableSelect(interaction, quest);
+
+		}
+		if (interaction.customId === 'questDifficulty') {
+			onQuestDifficultySelect(interaction, quest);
+		}
+	}
+
+	if (interaction.isModalSubmit()) {
+		if (interaction.customId === 'publishQuestModal') {
+			onPublishQuestModalSubmit(interaction, quest);
+		}
+		return;
+	}
+
+	if (!interaction.isCommand()) return;
 
 	const command = interaction.client.commands.get(interaction.commandName);
 

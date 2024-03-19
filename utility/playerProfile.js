@@ -22,7 +22,6 @@ async function onGuildAvailableScanUsers(guild) {
 	}).catch(console.error);
 }
 
-
 async function addUserToStore(member, guild, supabaseStore) {
 	// skip bot users
 	if (member.user.bot) {

@@ -46,9 +46,9 @@ class QuestInstance {
 }
 
 class Quest {
-	constructor(description, quest_type, create_by, reward_exp = 1, reward_coefficient = QuestExpRewardCoefficient.REWARD_INTRO) {
-		this.description = description;
-		this.quest_type = quest_type;
+	constructor(reward_exp = 1, reward_coefficient = QuestExpRewardCoefficient.REWARD_INTRO) {
+		this.description = null;
+		this.quest_type = null;
 		this.repeatable = false;
 
 		this.reward_coefficient = reward_coefficient;
@@ -56,7 +56,40 @@ class Quest {
 
 		this.create_at = null;
 		this.expire_at = null;
-		this.create_by = create_by;
+		this.create_by = null;
+	}
+
+	// setters for all attributes
+	setDescription(description) {
+		this.description = description;
+	}
+
+	setQuestType(quest_type) {
+		this.quest_type = quest_type;
+	}
+
+	setRepeatable(repeatable) {
+		this.repeatable = repeatable;
+	}
+
+	setRewardCoefficient(reward_coefficient) {
+		this.reward_coefficient = reward_coefficient;
+	}
+
+	setRewardExp(reward_exp) {
+		this.reward_exp = reward_exp;
+	}
+
+	setCreateAt(create_at) {
+		this.create_at = create_at;
+	}
+
+	setExpireAt(expire_at) {
+		this.expire_at = expire_at;
+	}
+	
+	setCreateBy(dcId) {
+		this.create_by = dcId;
 	}
 
 	updateAttributeFromStore(attributes) {
