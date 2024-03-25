@@ -20,7 +20,7 @@ const {
 const {
 	onQuestDifficultySelect,
 	onQuestRepeatableSelect,
-	onPublishQuestModalSubmit,
+	onSubmitQuestModalSubmit,
 } = require('./utility/questHelper.js');
 
 const {
@@ -48,8 +48,8 @@ const client = new Client({
 	],
 });
 
-const quest = new Quest();
-const questInstance = new QuestInstance(1, 1);
+// TODO: this is risky when multiple users are using the quest object at the same time
+const quests = {};
 
 // Create a new Collection to hold your commands.
 client.commands = new Collection();
@@ -147,24 +147,23 @@ client.on(Events.GuildMemberRemove, async member => {
 client.on(Events.InteractionCreate, async interaction => {
 	// Here we handle chat input commands and modal submit events
 	// TODO: Consider a better way for chaining the interaction events
-	// Quest Publish Chain:
+	// Quest Submit Chain:
 	// isModelSubmit: publishQuestModal -> onPublishQuestModalSubmit
-	// isStringSelectMenu: questRepeatable -> onQuestRepeatableSelect
-	// isStringSelectMenu: questDifficulty -> onQuestDifficultySelect
+
 
 	if (interaction.isStringSelectMenu()) {
-		if (interaction.customId === 'questRepeatable') {
-			onQuestRepeatableSelect(interaction, quest);
+		// if (interaction.customId === 'questRepeatable') {
+		// 	onQuestRepeatableSelect(interaction, quests);
 
-		}
-		if (interaction.customId === 'questDifficulty') {
-			onQuestDifficultySelect(interaction, quest);
-		}
+		// }
+		// if (interaction.customId === 'questDifficulty') {
+		// 	onQuestDifficultySelect(interaction, quests);
+		// }
 	}
 
 	if (interaction.isModalSubmit()) {
-		if (interaction.customId === 'publishQuestModal') {
-			onPublishQuestModalSubmit(interaction, quest);
+		if (interaction.customId === 'submitQuestModal') {
+			onSubmitQuestModalSubmit(interaction, quests, supabase);
 		}
 		return;
 	}
