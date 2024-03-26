@@ -158,7 +158,7 @@ module.exports = {
 		else if (interaction.options.getSubcommand() === 'revoke') {
 			console.log('revoke');
 			// check if the user has had a quest under review
-			supabase.from('RawQuest').select('*').eq('createBy', interaction.user.id)
+			supabase.from('RawQuest').select('*').eq('createBy', interaction.user.id).eq('reviewed', false)
 				.then((r) => {
 					console.log(JSON.stringify(r));
 					return r['data'];
