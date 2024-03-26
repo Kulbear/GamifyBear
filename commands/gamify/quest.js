@@ -108,6 +108,52 @@ module.exports = {
 		}
 		else if (interaction.options.getSubcommand() === 'info') {
 			console.log('info');
+
+			// check if the user has had a quest under review, only show unreviewed quest
+			supabase.from('RawQuest').select('*').eq('createBy', interaction.user.id).eq('reviewed', false)
+				.then((r) => {
+					console.log(JSON.stringify(r));
+					return r['data'];
+				})
+				.then(data => {
+					if (data && data.length > 0) {
+						const quest = data[0];
+						const questDescription = quest['description'];
+						const durationTextRaw = quest['durationTextRaw'];
+						const reviewed = quest['reviewed'];
+						const approved = quest['approved'];
+						const exampleEmbed = new EmbedBuilder()
+							.setColor(0x0099FF)
+							.setTitle('Quest Detail')
+							.setAuthor({
+								name: interaction.member.nickname,
+								iconURL: `https://cdn.discordapp.com/avatars/${interaction.user.id}/${interaction.user.avatar}.png`,
+								url: `https://discord.com/users/${interaction.user.id}`,
+							})
+							.setDescription(questDescription)
+						// user discord avatar url
+							.setThumbnail(`https://cdn.discordapp.com/avatars/${interaction.user.id}/${interaction.user.avatar}.png`)
+							.addFields(
+								{ name: 'Quest Duration', value: durationTextRaw },
+								{ name: 'Quest Review Status', value: reviewed ? (approved ? 'Approved' : 'Rejected') : 'Pending' },
+							)
+							.setTimestamp()
+							.setFooter({ text: 'Contact admins if you have any concern!' });
+
+
+						interaction.reply({
+							content: 'Your submitted quest has been shown below.',
+							ephemeral: true,
+							embeds: [exampleEmbed],
+						});
+					}
+					else {
+						interaction.reply({
+							content: 'You do not have any quest under review.',
+							ephemeral: true,
+						});
+					}
+				});
 		}
 		else if (interaction.options.getSubcommand() === 'revoke') {
 			console.log('revoke');
