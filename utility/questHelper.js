@@ -14,53 +14,70 @@ async function onSubmitQuestModalSubmit(interaction, quests, supabaseStore) {
 	const questDuration = interaction.fields.getTextInputValue('questDurationInput');
 	const submitter = interaction.user.id;
 
-	// tenary operator here, if quest undefined, create a new quest, else update the quest
-	const rawQuest = selectObjectByUserId(quests, submitter) || new RawQuest();
-
-	rawQuest.generateRawQuestId();
-	rawQuest.setDescription(questDescription);
-	rawQuest.setCreateBy(submitter);
-	rawQuest.setDuration(questDuration);
-
-	// now store the rawQuest object to Supabase
-	const rawQuestData = rawQuest.returnAttributeToStore();
-	console.debug(`[INFO] Inserting data ${JSON.stringify(rawQuestData)} to table [RawQuest]`);
-	supabaseStore.from('RawQuest').insert(rawQuestData)
+	// check if the user has had a quest under review
+	supabaseStore.from('RawQuest').select('*').eq('createBy', submitter)
 		.then((r) => {
-			console.debug(`[INFO] Inserted data ${JSON.stringify(r)} to table [RawQuest]`);
-		});
-
-	console.log(interaction);
-
-	const exampleEmbed = new EmbedBuilder()
-		.setColor(0x0099FF)
-		.setTitle('Quest Detail')
-		.setAuthor({
-			name: interaction.member.nickname,
-			iconURL: `https://cdn.discordapp.com/avatars/${interaction.user.id}/${interaction.user.avatar}.png`,
-			url: `https://discord.com/users/${interaction.user.id}`,
+			console.log(JSON.stringify(r));
+			return r['data'];
 		})
-		.setDescription(rawQuest.description)
-		// user discord avatar url
-		.setThumbnail(`https://cdn.discordapp.com/avatars/${interaction.user.id}/${interaction.user.avatar}.png`)
-		.addFields(
-			{ name: 'Quest Duration', value: rawQuest.durationTextRaw },
-			{ name: 'Quest Review Status', value: rawQuest.reviewed ? (rawQuest.approved ? 'Approved' : 'Rejected') : 'Pending' },
-		)
-		.setTimestamp()
-		.setFooter({ text: 'Contact Admins if you have any concern!' });
+		.then((data) => {
+			// user has had existing quest under review
+			if (data && data.length > 0) {
+				interaction.reply({
+					content: 'You have a quest under review, please wait until the admin review it. You can only submit one quest at a time.',
+					ephemeral: true,
+				});
+			}
+			else {
+
+				// tenary operator here, if quest undefined, create a new quest, else update the quest
+				const rawQuest = selectObjectByUserId(quests, submitter) || new RawQuest();
+
+				rawQuest.generateRawQuestId();
+				rawQuest.setDescription(questDescription);
+				rawQuest.setCreateBy(submitter);
+				rawQuest.setDuration(questDuration);
+
+				// now store the rawQuest object to Supabase
+				const rawQuestData = rawQuest.returnAttributeToStore();
+				// console.debug(`[INFO] Inserting data ${JSON.stringify(rawQuestData)} to table [RawQuest]`);
+				supabaseStore.from('RawQuest').insert(rawQuestData)
+					.then((r) => {
+						console.debug(`[INFO] Inserted data ${JSON.stringify(r)} to table [RawQuest]`);
+					});
 
 
-	await interaction.reply({
-		content: 'Your quest has been submitted! It will be reviewed by the admin ASAP and it will be published upon approval.',
-		ephemeral: true,
-		embeds: [exampleEmbed],
-	}).then(() => {
-		// remove the quest from the quests object
-		delete quests[submitter];
+				const exampleEmbed = new EmbedBuilder()
+					.setColor(0x0099FF)
+					.setTitle('Quest Detail')
+					.setAuthor({
+						name: interaction.member.nickname,
+						iconURL: `https://cdn.discordapp.com/avatars/${interaction.user.id}/${interaction.user.avatar}.png`,
+						url: `https://discord.com/users/${interaction.user.id}`,
+					})
+					.setDescription(rawQuest.description)
+					// user discord avatar url
+					.setThumbnail(`https://cdn.discordapp.com/avatars/${interaction.user.id}/${interaction.user.avatar}.png`)
+					.addFields(
+						{ name: 'Quest Duration', value: rawQuest.durationTextRaw },
+						{ name: 'Quest Review Status', value: rawQuest.reviewed ? (rawQuest.approved ? 'Approved' : 'Rejected') : 'Pending' },
+					)
+					.setTimestamp()
+					.setFooter({ text: 'Contact Admins if you have any concern!' });
 
-		// TODO: optionally remove the interaction message
-	});
+
+				interaction.reply({
+					content: 'Your quest has been submitted! It will be reviewed by the admin ASAP and it will be published upon approval.',
+					ephemeral: true,
+					embeds: [exampleEmbed],
+				}).then(() => {
+					// remove the quest from the quests object
+					delete quests[submitter];
+
+					// TODO: optionally remove the interaction message
+				});
+			}
+		});
 }
 
 async function onQuestDifficultySelect(interaction, quests) {
