@@ -6,6 +6,7 @@ const {
 	ModalBuilder,
 	TextInputBuilder,
 	TextInputStyle,
+	EmbedBuilder,
 } = require('discord.js');
 
 
@@ -59,7 +60,7 @@ module.exports = {
 				.setDescription('[Admin] Delete a quest...')),
 
 
-	async execute(interaction) {
+	async execute(interaction, supabase) {
 		// create a message that contains interactable button/reaction for the user
 		if (interaction.options.getSubcommand() === 'submit') {
 
@@ -107,6 +108,30 @@ module.exports = {
 		}
 		else if (interaction.options.getSubcommand() === 'info') {
 			console.log('info');
+		}
+		else if (interaction.options.getSubcommand() === 'revoke') {
+			console.log('revoke');
+			// check if the user has had a quest under review
+			supabase.from('RawQuest').select('*').eq('createBy', interaction.user.id)
+				.then((r) => {
+					console.log(JSON.stringify(r));
+					return r['data'];
+				})
+				.then(data => {
+					if (data && data.length > 0) {
+					// remove the quest from supabase
+						supabase.from('RawQuest').delete().eq('createBy', interaction.user.id)
+							.then((r) => {
+								console.log(JSON.stringify(r['data']));
+								console.log('Quest has been revoked!');
+								interaction.reply({
+									content: 'Your quest has been revoked! Now you can submit another quest!',
+									ephemeral: true,
+								});
+							});
+					}
+				});
+
 		}
 		else if (interaction.options.getSubcommand() === 'publish') {
 			console.log('publish');
