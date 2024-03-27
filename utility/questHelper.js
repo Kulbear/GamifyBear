@@ -15,7 +15,7 @@ const {
 } = require('discord.js');
 
 const { buildQuestSubmitEmbed } = require('./embedUtils.js');
-
+const { botErrorReply } = require('./guildMessages.js');
 
 function parseDurationText(durationText) {
 	// duration text will be in format of "1d2h3m4s"
@@ -102,10 +102,7 @@ async function onSubmitQuestModalSubmit(interaction, supabase) {
 				}
 			}
 			else {
-				interaction.reply({
-					content: '机器人出错啦，请联系管理员。',
-					ephemeral: true,
-				});
+				botErrorReply(interaction);
 			}
 		});
 }

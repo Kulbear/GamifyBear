@@ -8,7 +8,7 @@ const {
 } = require('discord.js');
 
 const { buildQuestSubmitModal } = require('../../utility/modalUtils.js');
-
+const { botErrorReply } = require('../../utility/guildMessages.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -191,25 +191,40 @@ module.exports = {
 				});
 		}
 		else if (interaction.options.getSubcommand() === 'revoke') {
-			console.log('revoke');
+			console.debug('[DEBUG] "/quest revoke" command received.');
 			// check if the user has had a quest under review
 			supabase.from('RawQuest').select('*').eq('createBy', interaction.user.id).eq('reviewed', false)
-				.then((r) => {
-					console.log(JSON.stringify(r));
-					return r['data'];
-				})
-				.then(data => {
-					if (data && data.length > 0) {
-					// remove the quest from supabase
-						supabase.from('RawQuest').delete().eq('createBy', interaction.user.id)
-							.then((r) => {
-								console.log(JSON.stringify(r['data']));
-								console.log('Quest has been revoked!');
-								interaction.reply({
-									content: 'Your quest has been revoked! Now you can submit another quest!',
-									ephemeral: true,
+				.then((res) => {
+					if (res.error === null) {
+						const data = res['data'];
+						if (data && data.length > 0) {
+							// remove the quest from supabase
+							supabase.from('RawQuest').delete().eq('createBy', interaction.user.id)
+								.then((res) => {
+									if (res.error === null) {
+										console.debug(`[DEBUG] Quest submitted by ${interaction.user.id} has been deleted.`);
+										interaction.reply({
+											content: '你提交的任务已经被撤回，现在可以重新提交新任务了。',
+											ephemeral: true,
+										});
+									}
+									else {
+										interaction.reply({
+											content: '撤回任务出错，请联系管理员。',
+											ephemeral: true,
+										});
+									}
 								});
+						}
+						else {
+							interaction.reply({
+								content: '你没有可以撤回的任务。',
+								ephemeral: true,
 							});
+						}
+					}
+					else {
+						botErrorReply(interaction);
 					}
 				});
 

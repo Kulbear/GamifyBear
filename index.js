@@ -140,8 +140,11 @@ client.on(Events.GuildMemberRemove, async member => {
 
 
 client.on(Events.InteractionCreate, async interaction => {
-	// TODO: Consider a better way for chaining the interaction events
+	// Simple Documentation for the interaction events
+	// /command [subcommand]: interactionCustomId(Helper/Util Functions)
+
 	// /quest submit: submitQuestModal(onSubmitQuestModalSubmit)
+	// /quest revoke: ...
 
 	if (interaction.isModalSubmit()) {
 		if (interaction.customId === 'submitQuestModal') {
