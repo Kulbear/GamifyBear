@@ -1,5 +1,4 @@
 // Description: This file contains the player model.
-/* eslint-disable no-unused-vars */
 
 const {
 	Role,

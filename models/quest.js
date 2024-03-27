@@ -1,5 +1,7 @@
 // Description: This file contains class definition for the quest related data model.
 
+const { QuestExpRewardCoefficient } = require('./static.js');
+
 function generateUniqueID(prefix) {
 	// generate a unique ID that start with the prefix and followed by a random text of 6 characters with numbers and letters
 	return prefix + Math.random().toString(36).substring(2, 8);
@@ -58,19 +60,19 @@ class RawQuest {
 	}
 
 	/**
-	 * Toggles the `reviewed` property.
+	 * Set the `reviewed` property.
 	 * @returns {void}
 	 */
-	toggleReviewed() {
-		this.reviewed = !this.reviewed;
+	setReviewed(status) {
+		this.reviewed = status;
 	}
 
 	/**
-	 * Toggles the `approved` property.
+	 * Set the `approved` property.
 	 * @returns {void}
 	 */
-	toggleApproved() {
-		this.approved = !this.approved;
+	setApproved(status) {
+		this.approved = status;
 	}
 
 	/**
@@ -113,16 +115,25 @@ class Quest {
 	 * Create a Quest.
 	 */
 	constructor() {
+		this.questId = null;
 		this.description = null;
-		this.quest_type = null;
+		this.questType = null;
 		this.repeatable = false;
-
-		this.reward_coefficient = null;
-		this.reward_exp = null;
-
-		this.create_at = null;
-		this.expire_at = null;
+		this.rewardCoefficient = QuestExpRewardCoefficient.REWARD_NORMAL;
+		this.rewardExp = null;
+		this.createAt = null;
+		this.expireAt = null;
 		this.createBy = null;
+		this.reviewedBy = null;
+		this.durationTextRaw = null;
+	}
+
+	/**
+	 * Set the duration text of the quest.
+	 * @param {string} durationTextRaw - The duration text of the quest.
+	 */
+	setDurationTextRaw(durationTextRaw) {
+		this.durationTextRaw = durationTextRaw;
 	}
 
 	/**
@@ -135,10 +146,10 @@ class Quest {
 
 	/**
 	 * Set the quest type of the quest.
-	 * @param {string} quest_type - The quest type of the quest.
+	 * @param {string} questType - The quest type of the quest.
 	 */
-	setQuestType(quest_type) {
-		this.quest_type = quest_type;
+	setQuestType(questType) {
+		this.questType = questType;
 	}
 
 	/**
@@ -151,42 +162,50 @@ class Quest {
 
 	/**
 	 * Set the reward coefficient of the quest.
-	 * @param {number} reward_coefficient - The reward coefficient of the quest.
+	 * @param {number} rewardCoefficient - The reward coefficient of the quest.
 	 */
-	setRewardCoefficient(reward_coefficient) {
-		this.reward_coefficient = reward_coefficient;
+	setRewardCoefficient(rewardCoefficient) {
+		this.rewardCoefficient = rewardCoefficient;
 	}
 
 	/**
 	 * Set the reward experience of the quest.
-	 * @param {number} reward_exp - The reward experience of the quest.
+	 * @param {number} rewardExp - The reward experience of the quest.
 	 */
-	setRewardExp(reward_exp) {
-		this.reward_exp = reward_exp;
+	setRewardExp(rewardExp) {
+		this.rewardExp = rewardExp;
 	}
 
 	/**
 	 * Set the creation time of the quest.
-	 * @param {Date} create_at - The creation time of the quest.
+	 * @param {Date} createAt - The creation time of the quest.
 	 */
-	setCreateAt(create_at) {
-		this.create_at = create_at;
+	setCreateAt(createAt) {
+		this.createAt = createAt;
 	}
 
 	/**
 	 * Set the expiration time of the quest.
-	 * @param {Date} expire_at - The expiration time of the quest.
+	 * @param {Date} expireAt - The expiration time of the quest.
 	 */
-	setExpireAt(expire_at) {
-		this.expire_at = expire_at;
+	setExpireAt(expireAt) {
+		this.expireAt = expireAt;
 	}
 
 	/**
 	 * Set the creator ID of the quest.
-	 * @param {string} dcId - The creator ID of the quest.
+	 * @param {string} createBy - The creator ID of the quest.
 	 */
-	setCreateBy(dcId) {
-		this.createBy = dcId;
+	setCreateBy(createBy) {
+		this.createBy = createBy;
+	}
+
+	/**
+	 * Set the reviewer ID of the quest.
+	 * @param {string} reviewedBy - The reviewer ID of the quest.
+	 */
+	setReviewedBy(reviewedBy) {
+		this.reviewedBy = reviewedBy;
 	}
 
 	/**
@@ -194,13 +213,17 @@ class Quest {
 	 * @param {Object} attributes - The attributes to update.
 	 */
 	updateAttributeFromStore(attributes) {
+		this.questId = attributes['questId'];
 		this.description = attributes['description'];
+		this.questType = attributes['questType'];
+		this.durationTextRaw = attributes['durationTextRaw'];
+		this.repeatable = attributes['repeatable'];
+		this.rewardCoefficient = attributes['rewardCoefficient'];
+		this.rewardExp = attributes['rewardExp'];
+		this.createAt = attributes['createAt'];
+		this.expireAt = attributes['expireAt'];
 		this.createBy = attributes['createBy'];
-		this.quest_type = attributes['quest_type'];
-		this.reward_coefficient = attributes['reward_coefficient'];
-		this.reward_exp = attributes['reward_exp'];
-		this.create_at = attributes['create_at'];
-		this.expire_at = attributes['expire_at'];
+		this.reviewedBy = attributes['reviewedBy'];
 	}
 
 	/**
@@ -209,13 +232,16 @@ class Quest {
 	 */
 	returnAttributeToStore() {
 		return {
+			'questId': this.questId,
 			'description': this.description,
+			'questType': this.questType,
+			'durationTextRaw': this.durationTextRaw,
+			'repeatable': this.repeatable,
+			'rewardCoefficient': this.rewardCoefficient,
+			'rewardExp': this.rewardExp,
+			'expireAt': this.expireAt,
 			'createBy': this.createBy,
-			'quest_type': this.quest_type,
-			'reward_coefficient': this.reward_coefficient,
-			'reward_exp': this.reward_exp,
-			'create_at': this.create_at,
-			'expire_at': this.expire_at,
+			'reviewedBy': this.reviewedBy,
 		};
 	}
 }

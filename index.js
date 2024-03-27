@@ -18,9 +18,12 @@ const {
 } = require('./models/quest.js');
 
 const {
-	onQuestDifficultySelect,
-	onQuestRepeatableSelect,
 	onSubmitQuestModalSubmit,
+	onQuestReviewButtonClick,
+	onQuestRepeatableButtonClick,
+	onExpButtonClick,
+	onEditQuestModalSubmit,
+	onReviewDecisionButtonClick,
 } = require('./utility/questHelper.js');
 
 const {
@@ -48,7 +51,9 @@ const client = new Client({
 	],
 });
 
-// TODO: this is risky when multiple users are using the quest object at the same time
+// used for quest submission
+const rawQuests = {};
+// used for quest review and acceptance
 const quests = {};
 
 // Create a new Collection to hold your commands.
@@ -163,10 +168,29 @@ client.on(Events.InteractionCreate, async interaction => {
 
 	if (interaction.isModalSubmit()) {
 		if (interaction.customId === 'submitQuestModal') {
-			onSubmitQuestModalSubmit(interaction, quests, supabase);
+			onSubmitQuestModalSubmit(interaction, rawQuests, supabase);
+		}
+		else if (interaction.customId === 'editQuestModal') {
+			onEditQuestModalSubmit(interaction, supabase);
 		}
 		return;
 	}
+
+	if (interaction.isButton()) {
+		if (interaction.customId === 'reviewQuestButton' || interaction.customId === 'rejectQuestButton') {
+			onQuestReviewButtonClick(interaction, supabase);
+		}
+		else if (interaction.customId === 'repeatableQuestButton' || interaction.customId === 'nonRepeatableQuestButton') {
+			onQuestRepeatableButtonClick(interaction, supabase);
+		}
+		else if (interaction.customId === 'Exp1Button' || interaction.customId === 'Exp2Button' || interaction.customId === 'Exp5Button') {
+			onExpButtonClick(interaction, supabase);
+		}
+		else if (interaction.customId === 'publishQuestButton' || interaction.customId === 'discardReviewButton') {
+			onReviewDecisionButtonClick(interaction, supabase);
+		}
+	}
+
 
 	if (!interaction.isCommand()) return;
 
