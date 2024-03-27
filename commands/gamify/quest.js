@@ -3,12 +3,11 @@
 const {
 	SlashCommandBuilder,
 	ActionRowBuilder,
-	ModalBuilder,
-	TextInputBuilder,
-	TextInputStyle,
 	EmbedBuilder,
 	ButtonBuilder,
 } = require('discord.js');
+
+const { buildQuestSubmitModal } = require('../../utility/modalUtils.js');
 
 
 module.exports = {
@@ -64,33 +63,10 @@ module.exports = {
 	async execute(interaction, supabase) {
 		// create a message that contains interactable button/reaction for the user
 		if (interaction.options.getSubcommand() === 'submit') {
+			console.debug('[DEBUG] "/quest submit" command received.');
+			const modal = buildQuestSubmitModal();
 
-			const modal = new ModalBuilder()
-				.setCustomId('submitQuestModal')
-				.setTitle('Submitting a new quest...');
-
-			// Add components to modal
-			// Create the text input components that asks for the quest description
-			const questDescriptionInput = new TextInputBuilder()
-				.setCustomId('questDescriptionInput')
-				.setLabel('What\'s the quest for?')
-				.setPlaceholder('Enter your task description here!')
-				.setStyle(TextInputStyle.Paragraph)
-				.setMaxLength(2500)
-				.setMinLength(3);
-
-			const questDurationInput = new TextInputBuilder()
-				.setCustomId('questDurationInput')
-				.setLabel('How long is the quest?')
-				.setPlaceholder('Deadline in? (e.g. 1w, 1d12h, 10d, 30m...)')
-				.setStyle(TextInputStyle.Paragraph);
-
-			const firstActionRow = new ActionRowBuilder().addComponents(questDescriptionInput);
-			const secondActionRow = new ActionRowBuilder().addComponents(questDurationInput);
-
-			// Add inputs to the modal
-			modal.addComponents(firstActionRow, secondActionRow);
-
+			// expected to be handled by onSubmitQuestModalSubmit
 			interaction.showModal(modal);
 		}
 		else if (interaction.options.getSubcommand() === 'list') {
@@ -101,10 +77,10 @@ module.exports = {
 					const data = r['data'];
 
 					if (data && data.length > 0) {
-					// create the embed message with another action row that contians two buttons to navigate the quest
-					// the embed started by showing the first quest in the data list
-					// the two button is left and right that can be clicked to navigate the quest
-					// the button click will change the embed content to the next or previous quest
+						// create the embed message with another action row that contians two buttons to navigate the quest
+						// the embed started by showing the first quest in the data list
+						// the two button is left and right that can be clicked to navigate the quest
+						// the button click will change the embed content to the next or previous quest
 
 						const quest = data[0];
 						const questDescription = quest['description'];

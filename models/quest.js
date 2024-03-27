@@ -56,7 +56,7 @@ class RawQuest {
 	 * @returns {void}
 	 */
 	generateRawQuestId() {
-		this.rawQuestId = generateUniqueID('QR');
+		this.rawQuestId = generateUniqueID('QID-');
 	}
 
 	/**

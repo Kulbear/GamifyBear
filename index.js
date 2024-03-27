@@ -13,11 +13,6 @@ const { supabaseUrl, supabaseKey } = require('./supabaseConfig.json');
 const { createClient } = require('@supabase/supabase-js');
 
 const {
-	Quest,
-	QuestInstance,
-} = require('./models/quest.js');
-
-const {
 	onSubmitQuestModalSubmit,
 	onQuestReviewButtonClick,
 	onQuestRepeatableButtonClick,
@@ -51,11 +46,6 @@ const client = new Client({
 	],
 });
 
-// used for quest submission
-const rawQuests = {};
-// used for quest review and acceptance
-const quests = {};
-
 // Create a new Collection to hold your commands.
 client.commands = new Collection();
 
@@ -86,7 +76,7 @@ client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 	// Send message to the channel with ID 1215866984550629386
 	// TODO: this is harded coded, need to find a way to get the channel id from the server
-	sendMessageToChannel(client, debugChannelId, '**God Chen the Almighty Creator** is ready to serve!');
+	sendMessageToChannel(client, debugChannelId, '**God Chen the Almighty Creator** 已经降临这个位面了!');
 });
 
 
@@ -150,25 +140,12 @@ client.on(Events.GuildMemberRemove, async member => {
 
 
 client.on(Events.InteractionCreate, async interaction => {
-	// Here we handle chat input commands and modal submit events
 	// TODO: Consider a better way for chaining the interaction events
-	// Quest Submit Chain:
-	// isModelSubmit: publishQuestModal -> onPublishQuestModalSubmit
-
-
-	if (interaction.isStringSelectMenu()) {
-		// if (interaction.customId === 'questRepeatable') {
-		// 	onQuestRepeatableSelect(interaction, quests);
-
-		// }
-		// if (interaction.customId === 'questDifficulty') {
-		// 	onQuestDifficultySelect(interaction, quests);
-		// }
-	}
+	// /quest submit: submitQuestModal(onSubmitQuestModalSubmit)
 
 	if (interaction.isModalSubmit()) {
 		if (interaction.customId === 'submitQuestModal') {
-			onSubmitQuestModalSubmit(interaction, rawQuests, supabase);
+			onSubmitQuestModalSubmit(interaction, supabase);
 		}
 		else if (interaction.customId === 'editQuestModal') {
 			onEditQuestModalSubmit(interaction, supabase);
