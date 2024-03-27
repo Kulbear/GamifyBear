@@ -9,13 +9,13 @@ function selectObjectByUserId(object, userId) {
 	return object[userId];
 }
 
-async function onSubmitQuestModalSubmit(interaction, quests, supabaseStore) {
+async function onSubmitQuestModalSubmit(interaction, rawQuests, supabaseStore) {
 	const questDescription = interaction.fields.getTextInputValue('questDescriptionInput');
 	const questDuration = interaction.fields.getTextInputValue('questDurationInput');
 	const submitter = interaction.user.id;
 
-	// check if the user has had a quest under review
-	supabaseStore.from('RawQuest').select('*').eq('createBy', submitter)
+	// check if the user has had a quest under review so we need to exclude the reviewed quest
+	supabaseStore.from('RawQuest').select('*').eq('createBy', submitter).eq('reviewed', false)
 		.then((r) => {
 			console.log(JSON.stringify(r));
 			return r['data'];
@@ -31,7 +31,7 @@ async function onSubmitQuestModalSubmit(interaction, quests, supabaseStore) {
 			else {
 
 				// tenary operator here, if quest undefined, create a new quest, else update the quest
-				const rawQuest = selectObjectByUserId(quests, submitter) || new RawQuest();
+				const rawQuest = selectObjectByUserId(rawQuests, submitter) || new RawQuest();
 
 				rawQuest.generateRawQuestId();
 				rawQuest.setDescription(questDescription);
@@ -71,8 +71,8 @@ async function onSubmitQuestModalSubmit(interaction, quests, supabaseStore) {
 					ephemeral: true,
 					embeds: [exampleEmbed],
 				}).then(() => {
-					// remove the quest from the quests object
-					delete quests[submitter];
+					// remove the quest from the rawQuests object
+					delete rawQuests[submitter];
 
 					// TODO: optionally remove the interaction message
 				});
